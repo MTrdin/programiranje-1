@@ -28,9 +28,10 @@ medved. Zvrhano zibelko sladkih hrušk mi je prinesel za en sam izdrt trn"."""
 ###############################################################################
 def find_words(text, podniz):
     pat = r"\b\w*" + podniz + r"\w*\b"
-
+    #lahko tudi brez \b na zacetku
     return set(re.findall(pat, text))
-    
+
+print(find_words(test_text, "zi")) 
 
 ###############################################################################
 # 2) Sestavite funkcijo [find_prefix], ki vrne množico vseh besed, ki se
@@ -41,7 +42,7 @@ def find_words(text, podniz):
 ###############################################################################
 def find_prefix(text, vzorec):
     pat = r"\b" + vzorec + r"\w*\b"
-
+    #lahko tudi brez \b na koncu
     return set(re.findall(pat, text))
 
 ###############################################################################
@@ -52,7 +53,8 @@ def find_prefix(text, vzorec):
 # {'zibala', 'razveselila', 'prestrašila', 'šivala', 'opazila', 'tla'}
 ###############################################################################
 def find_suffix(text, podniz):
-    pass
+    pattern = r"\w*" + podniz +r"\b"
+    return set(re.findall(pattern, text))
 
 ###############################################################################
 # 4) Sestavite funkcijo [double_letters], ki sprejme niz in vrne množico vseh
@@ -63,4 +65,5 @@ def find_suffix(text, podniz):
 ###############################################################################
 def double_letters(text):
     pat = r"(\b\w*(.)\2\w*\b)"
+    #ali tudi pat = r"\b(\w*(\w)\2\w*)\b"
     return set([j[0] for j in re.findall(pat, text)])
