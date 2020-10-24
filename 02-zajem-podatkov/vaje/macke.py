@@ -7,7 +7,7 @@ import re
 # Najprej definirajmo nekaj pomožnih orodij za pridobivanje podatkov s spleta.
 ###############################################################################
 
-# definiratje URL glavne strani bolhe za oglase z mačkami
+# definirajte URL glavne strani bolhe za oglase z mačkami
 cats_frontpage_url = 'http://www.bolha.com/zivali/male-zivali/macke/'
 # mapa, v katero bomo shranili podatke
 cat_directory = 'macke_zajeti_podatki'
@@ -18,7 +18,7 @@ csv_filename = 'TODO'
 
 
 def download_url_to_string(url):
-    """Funkcija kot argument sprejme niz in puskuša vrniti vsebino te spletne
+    """Funkcija kot argument sprejme niz in poskusi vrniti vsebino te spletne
     strani kot niz. V primeru, da med izvajanje pride do napake vrne None.
     """
     try:
@@ -87,11 +87,12 @@ def read_file_to_string(directory, filename):
 
 def page_to_ads(page_content):
     """Funkcija poišče posamezne ogllase, ki se nahajajo v spletni strani in
-    vrne njih seznam"""
+    vrne seznam oglasov"""
     pattern = re.compile('<li class="EntityList-item EntityList-item--Regular(.*?)</article>', re.DOTALL)
     return re.findall(pattern, page_content)
 
-
+# Definirajte funkcijo, ki sprejme niz, ki predstavlja oglas, in izlušči
+# podatke o imenu, lokaciji, datumu objave in ceni v oglasu.
 
 # Definirajte funkcijo, ki sprejme niz, k
         # del kode, ki morda sproži napako
@@ -138,7 +139,7 @@ def write_csv(fieldnames, rows, directory, filename):
     #se to je treba narest
     os.makedirs(directory, exist_ok=True)
     path = os.path.join(directory, filename)
-    with open(path, 'w') as csv_file:
+    with open(path, 'w', encoding='utf-8') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
@@ -153,10 +154,8 @@ def write_csv(fieldnames, rows, directory, filename):
 
 def write_cat_ads_to_csv(ads, directory, filename):
     """Funkcija vse podatke iz parametra "ads" zapiše v csv datoteko podano s
-    parametroma "directory"/"filename". Funkcija predpostavi, da sa ključi vseh
-    sloverjev parametra ads enaki in je seznam ads neprazen.
-
-    """
+    parametroma "directory"/"filename". Funkcija predpostavi, da so ključi vseh
+    slovarjev parametra ads enaki in je seznam ads neprazen."""
     # Stavek assert preveri da zahteva velja
     # Če drži se program normalno izvaja, drugače pa sproži napako
     # Prednost je v tem, da ga lahko pod določenimi pogoji izklopimo v
@@ -185,8 +184,8 @@ def main(redownload=True, reparse=True):
 #[{"ime": "Macek 1", cena:17},{}]
     # Podatke shranimo v csv datoteko
 
-    # Dodatno: S pomočjo parameteov funkcije main omogoči nadzor, ali se
-    # celotna spletna stran ob vsakem zagon prense (četudi že obstaja)
+    # Dodatno: S pomočjo parametrov funkcije main omogoči nadzor, ali se
+    # celotna spletna stran ob vsakem zagon prenese (četudi že obstaja)
     # in enako za pretvorbo
 
     raise NotImplementedError()
