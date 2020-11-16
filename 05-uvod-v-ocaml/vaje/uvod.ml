@@ -121,7 +121,7 @@ let rec insert x k = function
  - : int list * int list = ([1; 2], [3; 4; 5])
  # divide 7 [1; 2; 3; 4; 5];;
  - : int list * int list = ([1; 2; 3; 4; 5], [])
-[*----------------------------------------------------------------------------*)ž
+[*----------------------------------------------------------------------------*)
 
 
 (* tule ne deluje za negativne k-je *)
@@ -132,6 +132,14 @@ let rec divide k list = match (k, list) with
     (x::prvi,drugi)
   )
   |(_, []) -> ([], [])
+
+let rec divide k list = 
+  match (k, list) with
+  | (_, []) -> ([], [])
+  | (k, list) when k <= 0 -> ([], list)
+  | (k, x :: xs) ->
+      let (list1, list2) = divide (k - 1) xs in
+	    (x :: list1, list2)
 
 
 (*----------------------------------------------------------------------------*]
@@ -203,3 +211,11 @@ let rec second_largest = function
   | [] -> 0
   | x::y::xs -> x + y
   | x::xs -> x
+
+let second_largest list =
+  let rec largest = function
+    | [] -> failwith "List is too short."
+	  | x :: [] -> x
+	  | x :: xs -> max x (largest xs)
+  in
+  largest (delete (largest list) list)
