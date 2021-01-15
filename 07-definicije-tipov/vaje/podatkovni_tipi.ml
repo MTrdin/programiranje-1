@@ -100,13 +100,13 @@ let rec intbool_map f_int f_bool ib_list = match ib_list with
  Funkcija je repno rekurzivna.
 [*----------------------------------------------------------------------------*)
 
-let intbool_reverse = 
-       let rec reverse_pomozna gradimo podiramo = match podiramo with
-              | Empty -> gradimo
+let rec intbool_reverse sez = 
+       let rec reverse_pomozna gradimo s = match s with
+              | Empty -> gradimo (*ali acc kot akumulator*)
               | Int(x, rep) -> reverse_pomozna (Int(x, gradimo)) rep
               | Bool(x, rep) -> reverse_pomozna (Bool(x, gradimo)) rep
        in
-       reverse_pomozna Empty l
+       reverse_pomozna Empty sez
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_separate ib_list] loči vrednosti [ib_list] v par [list]
@@ -140,7 +140,10 @@ let rec intbool_separate =
  [specialisation], ki loči med temi zaposlitvami.
 [*----------------------------------------------------------------------------*)
 
-type magic = Fire | Frost | Arcane
+type magic = 
+       | Fire 
+       | Frost 
+       | Arcane
 
 type specialisation = Historian | Teacher | Researcher
 
@@ -182,6 +185,11 @@ let profesor = {name = "Matija"; status = Employed (Fire, Teacher)}
 
 type magic_counter = {fire: int; frost: int; arcane: int}
 
+let update_preglednejsa counter = function
+  | Fire -> {counter with fire = counter.fire + 1}
+  | Frost -> {counter with frost = counter.frost + 1}
+  | Arcane -> {counter with arcane = counter.arcane + 1}
+
 let update ({arcane} as magic_counter) magic_type = match magic_type with
        | Fire -> { fire=magic_counter.fire + 1;
               frost=magic_counter.frost;
@@ -196,6 +204,17 @@ let update ({arcane} as magic_counter) magic_type = match magic_type with
  # count_magic [professor; professor; professor];;
  - : magic_counter = {fire = 3; frost = 0; arcane = 0}
 [*----------------------------------------------------------------------------*)
+let rec count_magic_boljsa carovniki =
+       let rec count_pomozna acc sez = match sez with
+              | [] -> acc
+              | {name, status}::wizards -> (
+                     match status with
+                     | Newbie -> count_pomozna acc wizards (*nima se magije*)
+                     | Student (magic,_)-> count_pomozna (update acc magic) wizards
+                     | Employed (magic, _) -> count_pomozna (update counter magic) wizards)
+       in
+       count_pomozna {fire = 0; frost = 0; arcane = 0} carovniki
+
 
 let rec count_magic l =
        let rec count_pomozna trenutno delovni_sez = match delovni_sez with

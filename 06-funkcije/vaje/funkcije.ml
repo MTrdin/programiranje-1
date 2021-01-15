@@ -10,12 +10,13 @@ let rec reverse_kvadraten sez =
   | [] -> []
   | a :: rest -> (reverse_kvadraten rest) @ [a]
 
+(*repnorekurzivna*)
 let rec reverse_bolje sez =
-  let rec reverse_pomozna gradimo = function
-    | [] -> gradimo
-    | x::xs -> reverse_pomozna (x::gradimo) xs
-    in
-    reverse_pomozna [] sez
+  let rec reverse_pomozna acc = function
+    | [] -> acc
+    | x::xs -> reverse_pomozna (x::acc) xs
+  in
+  reverse_pomozna [] sez
 
 
 (*----------------------------------------------------------------------------*]
@@ -40,6 +41,10 @@ let rec repeat x n = if n <= 0 then [] else x:: (repeat x (n-1))
  - : int list = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
 [*----------------------------------------------------------------------------*)
 
+(*ta tudi dela sam nima akumulatorja pa ni cis pravilna*)
+(*let rec range_moja n =
+  if n < 0 then [] else (range (n-1)) @ [n]
+*)
 let range =
   let rec range_pomozna acc n = (*acc je akumulator*)
     if n < 0 then acc 
@@ -49,6 +54,11 @@ let range =
   in
   range_pomozna []
 
+let range_resitve n =
+  let rec range_aux n acc =
+    if n < 0 then acc else range_aux (n - 1) (n :: acc)
+  in
+  range_aux n []
 (*----------------------------------------------------------------------------*]
  Funkcija [map f list] sprejme seznam [list] oblike [x0; x1; x2; ...] in
  funkcijo [f] ter vrne seznam preslikanih vrednosti, torej
@@ -62,7 +72,7 @@ let range =
 (*pomembna funkcija*)
 let rec map f sez = function
   | [] -> []
-  | x::xs -> f x map f xs
+  | x::xs -> f x :: (map f xs)
 
 let je_sod = map (fun x -> x mod 2 = 0)
 
@@ -75,8 +85,8 @@ let je_sod = map (fun x -> x mod 2 = 0)
 [*----------------------------------------------------------------------------*)
 
 let map_tlrec f sez =
-  let map_pomozna acc = function
-    | [] -> reverse_bolje acc
+  let rec map_pomozna acc = function
+    | [] -> reverse_bolje acc (*to je zgoraj definirano*)
     | x::xs -> map_pomozna (f x :: acc) xs
   in
   map_pomozna [] sez
@@ -128,6 +138,12 @@ let rec zip l1 l2 = match (l1, l2) with
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
 
+let rec unzip_boljsa = function
+  | [] -> ([], [])
+  | (x, y) :: ostalo -> let (list1, list2) = unzip_boljsa ostalo in
+   (x :: list1, y :: list2)
+
+
 let rec unzip = function
   | [] -> ([], [])
   | (x, y)::l -> 
@@ -141,6 +157,13 @@ let rec unzip = function
  # unzip_tlrec [(0,"a"); (1,"b"); (2,"c")];;
  - : int list * string list = ([0; 1; 2], ["a"; "b"; "c"])
 [*----------------------------------------------------------------------------*)
+let rec unzip_tl sez = 
+  let rec pomozna s acc1 acc2 = match s with
+    | [] -> (reverse_bolje acc1,reverse_bolje acc2)
+    | (x,y):: ostalo -> pomozna (x::acc1, y::acc2) ostalo
+  in
+  pomozna sez [] []
+
 
 let rec unzip_tlrec = 
   let rec unzip_pomozna acc l = match l with
@@ -224,7 +247,7 @@ let rec filter f l = match l with
 let rec exists f = function
   | [] -> false
   | x::xs -> if f x then true else exists f xs
-  | x::xs -> f x || exists f xs
+  (*| x::xs -> f x || exists f xs*)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [first f default list] vrne prvi element seznama, za katerega
@@ -239,4 +262,4 @@ let rec exists f = function
 
 let rec first f default = function
   | [] -> default
-  | x:xs -> if f x then x else first f default xs
+  | x::xs -> if f x then x else first f default xs

@@ -32,7 +32,7 @@ let middle_of_triple_let triple =
 [*----------------------------------------------------------------------------*)
 
 let starting_element sez = match sez with
-  (*| [] -> failwith "podal si prazen seznam"*)
+  | [] -> failwith "podal si prazen seznam"
   | prvi::_ -> prvi
 (*----------------------------------------------------------------------------*]
  Funkcija [multiply] zmnoži vse elemente seznama. V primeru praznega seznama
@@ -90,6 +90,9 @@ let rec get k list = match list with
  # double [1; 2; 3];;
  - : int list = [1; 1; 2; 2; 3; 3]
 [*----------------------------------------------------------------------------*)
+let rec double_moja sez = match sez with
+  | []-> []
+  | x::ostalo -> [x;x] @ doubl ostalo
 
 let rec double = function
   | [] -> []
@@ -218,4 +221,4 @@ let second_largest list =
 	  | x :: [] -> x
 	  | x :: xs -> max x (largest xs)
   in
-  largest (delete (largest list) list)
+  largest (remove (largest list) list)
