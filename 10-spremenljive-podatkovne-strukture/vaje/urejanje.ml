@@ -36,16 +36,21 @@ let rec randlist len max =
  # insert 7 [];;
  - : int list = [7]
 [*----------------------------------------------------------------------------*)
-let rec insert y ys = match xs with
+let rec insert y ys = match ys with
     | []-> [y]
     | x::xs -> if y <= x then y :: (x::xs) else x :: (insert y xs)
+
+let rec insert_z_when y sez = match sez with
+    | [] -> [y]
+    | x::xs when y > x -> x :: insert y xs
+    | x::xs -> y::x::xs
 
 (*----------------------------------------------------------------------------*]
  Prazen seznam je že urejen. Funkcija [insert_sort] uredi seznam tako da
  zaporedoma vstavlja vse elemente seznama v prazen seznam.
 [*----------------------------------------------------------------------------*)
 let insert_sort l = 
-    List.fold (fun ze_sorted x -> insert x ze_sorted) [] l
+    List.fold_left (fun ze_urejen x -> insert x ze_urejen) [] l
 
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
@@ -57,17 +62,36 @@ let insert_sort l =
  najmanjši element v [list] in seznam [list'] enak [list] z odstranjeno prvo
  pojavitvijo elementa [z]. V primeru praznega seznama vrne [None]. 
 [*----------------------------------------------------------------------------*)
-let min_and_rest list = Some (z, list')
+let min_and_rest_0 list =
+    let rec poiscimo_min trenutni_min sez = match sez with
+        | [] -> trenutni_min
+        | x::xs -> poiscimo_min (min x trenutni_min) xs
+    in
+
+    let rec odstranimo_el n sez = match sez with
+        | [] -> failwith "not found"
+        | x::xs -> if x = n then xs else x :: odstranimo_el n xs
+    in
+
+    match list with
+        | [] -> None
+        | x::xs -> 
+            let m = poiscimo_min x xs in
+            let nov_list = odstranimo_el m (x::xs) in
+            Some (m, nov_list)
+
+
+let min_and_rest list =
     (*najprej najdemo minimum potem odstranimo ostanek*)
     let rec odstrani_preostanek x l = match l with
-    | [] -> [] (*to se ne sme zgoditi*)
-    | (y::ys) -> if x=y then ys else (y:: odstrani_preostanek x ys)
+        | [] -> failwith "not found" (*to se ne sme zgoditi*)
+        | y :: ys -> if x = y then ys else y :: odstrani_preostanek x ys
     in
     match list with
     | [] -> None
     | x::xs ->
         let min_trenutnega = List.fold_left min x xs in
-        Some (min_trenutnega, odstrani_preostanek) min_trenutnega (x::xs) )
+        Some (min_trenutnega, odstrani_preostanek min_trenutnega (x::xs))
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Pri urejanju z izbiranjem na vsakem koraku ločimo dva podseznama, kjer je prvi
@@ -88,7 +112,7 @@ let min_and_rest list = Some (z, list')
 [*----------------------------------------------------------------------------*)
 
 let rec selection_sort l = 
-    match min_and_rest l 
+    match min_and_rest l with
     | None -> []
     | Some (mini, tail) -> mini :: (selection_sort tail)
 
@@ -130,25 +154,35 @@ let swap a i j =
  index_min [|0; 2; 9; 3; 6|] 2 4 = 4
 [*----------------------------------------------------------------------------*)
 
+(*z zanko*)
+
 let index_min a lower upper = 
-    let trenutni_index_min = ref lower in
+    let trenutni_index_min = ref lower in (*ref pove da bo array sepravi se bo spreminjal*)
     let min_value = ref a.(!trenutni_index_min) in(* ce bi si hoteli sproti shranjevati še vrednost*)
     for i = start to upper do (*i in (strart, upper) for i=0 to Arrray.lebght a je narobe*)
         if a.(i) < a.(!trenutni_index_min) then
             trenutni_index_min := i
-        else
-            ()
+        else ()
     done;
     !trenutni_index_min
+
+
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort_array] implementira urejanje z izbiranjem na mestu. 
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  Namig: Za testiranje uporabi funkciji [Array.of_list] in [Array.to_list]
  skupaj z [randlist].
 [*----------------------------------------------------------------------------*)
+
 let selection_sort_array a =
-    let end_index = (Array.lenght a) - 1 in
+    let end_index = Array.lenght a - 1 in
+    (*vsak korak se urejen index premakne eno mesto desno*)
     for urejen_index = 0 to end_index do
         let in_min = index_min a urejen_index end_index in
         swap a urejen_index in_min
     done
+let selection_sort_list list =
+  (* For testing purposes. *)
+  let a = Array.of_list list in
+  selection_sort_array a;
+  Array.to_list a

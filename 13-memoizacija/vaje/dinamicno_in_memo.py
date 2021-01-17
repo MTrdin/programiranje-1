@@ -16,7 +16,8 @@ def najdaljse_narascajoce_podazporedje(l):
     # momoizirajmo to funkcijo
     @lru_cache(maxsize=None)
     def podzaporedje(i, zadnji):
-        if i >= len(i):
+        #i = index trenutnega elementa
+        if i >= len(l):
             return []
         if sez[i] >= zadnji:
             vzamemo = [l[i]] * podzaporedje(i+1, l[i])
@@ -30,12 +31,48 @@ def najdaljse_narascajoce_podazporedje(l):
 
     return podzaporedje(0, float("-inf"))
 
+def najdaljse_narascajoce_podazporedje_2(sez):
+    @lru_cache(maxsize=None)
+    def najdaljse(spodnja_meja, i):
+        #spodnja meja je nek element v seznamu
+        if i >= len(sez):
+            return []
+        elif sez[i] < spodnja_meja:
+            # neprimeren element preskocimo
+            return najdaljse(spodnja_meja, i + 1)
+        else:
+            # razveljavitev in agregacija glede na dolzino
+            s_prvim = [sez[i]] + najdaljse(sez[i],i)
+            brez_prvega = najdaljse(spodnja_meja, i+1)
+            if len(s_prvim) > len(brez_prvega):
+                return s_prvim
+            else:
+                return brez_prvega
+    return najdaljse(float("-inf"), 0)
 # -----------------------------------------------------------------------------
 # Rešitev sedaj popravite tako, da funkcija `vsa_najdaljsa` vrne seznam vseh
 # najdaljših naraščajočih podzaporedij.
 # -----------------------------------------------------------------------------
+def vsa_najdaljsa(sez):
+    #dodatno vračamo dolzino zaporedij v mnozici
+    @lru_cache(maxsize=None)
+    def najdaljse(spodnja_meja, i):
+        if i >= len(sez):
+            return (0, [[]])
+        elif sez[i] < spodnja_meja:
+            return najdaljse(spodnja_meja, i+1)
+        else:
+            d_z, zap_z = najdaljse(sez[i], i + 1)  # tem moramo še dodati člen
+            d_brez, zap_brez = najdaljse(spodnja_meja, i + 1)
+            if d_z+1 > d_brez:
+                # moramo še dodati element
+                return (d_z+1, [[sez[i]]+zap for zap in zap_z])
+            elif d_z+1 < d_brez:
+                return (d_brez, zap_brez)
+            else:
+                return (d_brez, [[sez[i]]+zap for zap in zap_z] + zap_brez)
 
-
+    return najdaljse(float("-inf"), 0)[1]
 
 # =============================================================================
 # Žabica
@@ -50,7 +87,7 @@ def najdaljse_narascajoce_podazporedje(l):
 # `k`-to polje ali dlje (torej prvo polje, ki ni več vsebovano v tabeli).
 # 
 # Energičnost žabice predstavimo z dolžino najdaljšega možnega skoka. Torej
-# lahko žabica z količino energije `e` skoči naprej za katerokoli razdaljo med
+# lahko žabica s količino energije `e` skoči naprej za katerokoli razdaljo med
 # `1` in `e`, in če skoči naprej za `k` mest ima sedaj zgolj `e - k` energije.
 # Na vsakem polju močvare prav tako označimo, koliko energije si žabica povrne,
 # ko pristane na polju. Tako se včasih žabici splača skočiti manj daleč, da
@@ -72,6 +109,18 @@ def pobeg(marost):
         return 1 + min(navzdol)
     
     return pobeg_notranja(0,0)
+
+def zabica(mocvara):
+    #mocvara je seznam energij
+    @lru_cache(maxsize=None)
+    def beg(i, energija):
+        #i = premik za k mest
+        if i >= len(mocvara):
+            return 0
+        else:
+            energija += mocvara[i]
+            return 1 + min([beg(i+d, energija-d) for d i  range(1, energija+1)])
+    return beg(0,0)
 
 # =============================================================================
 # Nageljni
@@ -103,7 +152,21 @@ def nageljni_stevilo(n, m, l):
     else: 
         return nageljni_stevilo(n-1, m, l) + nageljni_stevilo(n-l-1, m-1, l)
 
-
+@lru_cache(maxsize=None)
+def nageljni(n, m, l):
+    if m <= 0:
+        return [[0 for i in range(n)]]
+    elif n < l:
+        return []
+    elif n == 1 and m == 1:
+        # zapolnimo do potankosti
+        # dodan kot robni primer, da lahko v naslednji opciji vedno dodamo 0
+        # na desno stran korita
+        return [[1 for _ in range(n)]]
+    else:
+        ne_postavimo = [[0] + postavitev for postavitev in nageljni(n-1,m,l)]
+        postavimo = [[1 for _ in range(l)] + [0] + postavitev for postavitev in nageljni(n-l-1, m-1, l)]
+        return postavimo + ne_postavimo
 
 # =============================================================================
 # Pobeg iz Finske

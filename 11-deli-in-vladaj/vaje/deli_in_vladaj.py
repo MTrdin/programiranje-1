@@ -27,6 +27,7 @@
 #     [10, 0, 2, 4, 11, 5, 17, 15, 18]
 ###############################################################################
 
+#ne dobimo enake tabele kot zgoraj
 def pivot(a, start, end):
     p = a[start]
     left = start
@@ -34,17 +35,17 @@ def pivot(a, start, end):
     #pustimo si mesto na a[start]
     #vse kar delamo delamo na left + 1
     #in ju na koncu zamenjamo
-    while left <= right:
-        if a[left] < p:
+    while left < right:
+        if a[left+1] <= p:
             left += 1
         elif p < a[right]:
             right -= 1
         else:
-            a[left], a[right] = a[right], a[left]
+            a[left+1], a[right] = a[right], a[left+1]
         
-    a[start], a[left-1] = a[left-1], a[start]#pri navadnem quick sort ni tega
+    a[start], a[left] = a[left], a[start]#pri navadnem quick sort ni tega
     return left
-    
+#pivot([10, 4, 5, 15, 11, 2, 17, 0, 18], 1,7)
 ###############################################################################
 # V tabeli želimo poiskati vrednost k-tega elementa po velikosti.
 #
@@ -60,13 +61,13 @@ def pivot(a, start, end):
 # rešite brez da v celoti uredite tabelo [a].
 ###############################################################################
 
-def k_ti_po_vrsti(a,k start, stop):
-    pivot_i = pivot(a, start, stop)
-    if pivot_i > k:
-        return k_ti_po_vrsti(a, k, start, pivot_i - 1)
-    if pivot_i < k:
-        return k_ti_po_vrsti(a, k, pivot_i + 1, stop)
-    return a[pivot_i]
+def k_ti_po_vrsti(a,k, start, stop):
+    p_index = pivot(a, start, stop)
+    if p_index > k:
+        return k_ti_po_vrsti(a, k, start, p_index - 1)
+    if p_index < k:
+        return k_ti_po_vrsti(a, k, p_index + 1, stop)
+    return a[p_index]
 
 def kth_element(a, k):
     if k >= len(a):
@@ -98,8 +99,8 @@ def quicksort(a, start=0, stop=None):
     if start >= stop:
         return
     pivot_i = pivot(a, start, stop)
-    quicksort(a, strat, pivot_i - 1)
-    quicksort(a, pivot_i + 1, stop)
+    quicksort(a, start, pivot_i - 1) #uredi levo stran od pivota
+    quicksort(a, pivot_i + 1, stop) #uredi desno stran od pivota
 
 ###############################################################################
 # Če imamo dve urejeni tabeli, potem urejeno združeno tabelo dobimo tako, da
@@ -125,6 +126,7 @@ def quicksort(a, start=0, stop=None):
 ###############################################################################
 
 def zlij(target, begin, end, list_1, list_2):
+    #lahko predpostavimo da je vsota dolzin seznamov enaka dolzini targeta
     i1 = 0
     i2 = 0
     while (i1 < len(list_1) and i2 < len(list_2)):
@@ -141,6 +143,19 @@ def zlij(target, begin, end, list_1, list_2):
     while i2 < len(list_2):
         target[begin + i1 + i2] = list_2[i2]
         i2 += 1
+
+
+def merge(target, list1, list2):
+    # We assume lenghts of list1 and list2 exactly add up to that of target
+    i1, i2 = 0, 0
+    for j in range(len(target)):
+        if (i2 >= len(list2)) or (i1 < len(list1) and list1[i1] <= list2[i2]):
+            target[j] = list1[i1]
+            i1 += 1
+        else:
+            target[j] = list2[i2]
+            i2 += 1
+    return
 
 ###############################################################################
 # Tabelo želimo urediti z zlivanjem (merge sort). Tabelo razdelimo na polovici,
@@ -162,7 +177,7 @@ def mergesort(a, begin=0, end=None):
     if end is None:
         end = len(a)
 
-    if (end - begin > 1): #treba je uredi, ker imamo seznam dolzine >= 1
+    if (end - begin > 1): #treba je uredit, ker imamo seznam dolzine >= 1
         midpoint = (begin + end) // 2
         mergesort(a,begin, midpoint)
         mergesort(a, midpoint, end)

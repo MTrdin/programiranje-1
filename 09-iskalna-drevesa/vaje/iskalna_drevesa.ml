@@ -247,7 +247,7 @@ let test_dict =
 [*----------------------------------------------------------------------------*)
 
 let rec dict_get k = function
-     | Prazno -> Prazno
+     | Prazno -> None
      | Vozlisce (l, (k', v'), r) ->
           if k < k' then
                dict_get k l
@@ -277,6 +277,13 @@ let rec print_string_int_dict = function
           let () = print_endline (k ^ " : " ^ (string_of_int v)) in
           print_string_int_dict l;
           print_string_int_dict r
+
+let rec print_dict_01 = function
+  | Empty -> ()
+  | Node (d_l, (k, v), d_r) -> (
+      print_dict_01 d_l;
+      print_string (k ^ " : "); print_int v; print_newline ();
+      print_dict_01 d_r)
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_insert key value dict] v slovar [dict] pod ključ [key] vstavi
  vrednost [value]. Če za nek ključ vrednost že obstaja, jo zamenja.

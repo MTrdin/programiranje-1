@@ -24,14 +24,14 @@ let test_matrix =
 let max_cheese matrix =
    let h = Array.length matrix in
    let w = Array.length matrix.(0) in
-   let max_cheese_aux vrstica_i stolpec_i =
+   let rec max_cheese_aux vrstica_i stolpec_i =
       if vrstica_i > (h-1) || stolpec_i > (w-1) then 0
       else
          let right = max_cheese_aux vrstica_i (stolpec_i +1) in
          let down = max_cheese_aux (vrstica_i +1) stolpec_i in
          matrix.(vrstica_i).(stolpec_i) + (max right down)
    in
-   max_cheese 0 0
+   max_cheese_aux 0 0
 
 let zacetek = test_matrix.(0).(0)
 (*----------------------------------------------------------------------------*]
@@ -67,9 +67,29 @@ let optimal_path matrix =
             (matrix.(vrstica_i).(stolpec_i) + down, Down::path_down)
          (*matrix.(vrstica_i).(stolpec_i) + (max right down)*)
    in
-   max_cheese 0 0 |> snd
+   max_cheese 0 0 |> snd (*snd od max_chese *)
 
+(* snd sprejme par in vrne drugega
+   fst sprejme par in vrne prvega*)
+let convert_path_resitve cheese_matrix path =
+  let rec walk y x = function
+    | [] -> []
+    | dir :: xs ->
+        let r, d = 
+          match dir with Right -> (0, 1) | Down -> (1, 0) 
+        in
+        cheese_matrix.(y).(x) :: walk (y + d) (x + r) xs
+  in
+  walk 0 0 path
 
+let convert_path matrika =
+   let sez_poti = optimal_path matrika in
+   let rec convert_path_pomozna vrstica stolpec sez = match sez with
+   | [] -> sez
+   | x:: xs -> if x = Down then x:: convert_path_pomozna (vrstica+1) stolpec xs
+               else convert_path_pomozna vrstica (stolpec+1) xs
+   in
+   convert_path_pomozna 0 0 sez_poti
 (*----------------------------------------------------------------------------*]
  Rešujemo problem sestavljanja alternirajoče obarvanih stolpov. Imamo štiri
  različne tipe gradnikov, dva modra in dva rdeča. Modri gradniki so višin 2 in
@@ -86,6 +106,18 @@ let optimal_path matrix =
  - : int = 35
 [*----------------------------------------------------------------------------*)
 
+let alternating_towers n =
+   let rec najvisja_rdeca visina =
+      if visina <= 0 then 0
+      else if visina <= 2 then 1
+      else najvisja_modra (visina -1) + najvisja_modra (visina -2)
+   and najvisja_modra visina =
+      if visina <= 0 then 0
+      else if visina = 2 then 1
+      else if visina = 3 then 2
+      else najvisja_modra (visina-2) + najvisja_modra (visina -3)
+   in
+   najvisja_modra n + najvisja_modra n
 
 
 (*----------------------------------------------------------------------------*]
@@ -113,10 +145,33 @@ let optimal_path matrix =
 type blue_block = Blue3 | Blue2
 type red_block = Red2 | Red1
 
+(*iz navodil*)
 type red_tower = TopRed of red_block * blue_tower | RedBottom
 and blue_tower = TopBlue of blue_block * red_tower | BlueBottom
 
 type tower = Red of red_tower | Blue of blue_tower
+
+
+let rec add_red red_block = List.map (fun t -> TopRed (red_block, t))
+let rec add_blue blue_block = List.map (fun t -> TopBlue (blue_block, t))
+
+let enumerate_towers height =
+  let rec redtop height =
+    if height < 0 then []
+    else if height = 0 then [RedBottom]
+    else
+        add_red Red1 (bluetop (height - 1)) 
+        @ add_red Red2 (bluetop (height - 2))
+  and bluetop height =
+    if height < 0 || height = 1 then [] 
+    else if height = 0 then [BlueBottom]
+    else 
+      add_blue Blue2 (redtop (height - 2)) 
+      @  add_blue Blue3 (redtop (height - 3))
+  in
+  List.map (fun t -> Red t) (redtop height)
+  @ List.map (fun t -> Blue t) (bluetop height)
+
 
 (*----------------------------------------------------------------------------*]
  Vdrli ste v tovarno čokolade in sedaj stojite pred stalažo kjer so ena ob
@@ -139,3 +194,35 @@ type tower = Red of red_tower | Blue of blue_tower
 [*----------------------------------------------------------------------------*)
 
 let test_shelf = [1;2;-5;3;7;19;-30;1;0]
+
+(* It is easier to switch to an array, but not necessary *)
+
+let ham_ham list k =
+  (* Naive version (needs memoisation) *)
+  let rec skip k sweets skips =
+    (* Skips k sweets and also gives us instructions skipping it (takes care of
+    premature list endings) *)
+    match k, sweets with
+    | 0, _ -> sweets, skips
+    | k, [] -> [], skips
+    | k, s :: sws -> skip (k-1) sws (false :: skips)
+  in
+  let rec nom_nom = function
+    (* Returns the optimal value and the instructions to achieve it *)
+    | [] -> 0, []
+    | s :: sws -> 
+        let nom =
+          (* eat this one *)
+          let sws_after_skip, skips = skip k sws [] in
+          let v_nom, instr_nom = nom_nom sws_after_skip in
+          v_nom + s, true :: skips @ instr_nom
+        in
+        let no_nom =
+          (* do not eat this one *)
+          let v_no_nom, instr_no_nom = nom_nom sws in
+          v_no_nom, false :: instr_no_nom
+        in
+        max nom no_nom
+  in
+  let v_opt, instr_opt = nom_nom list in
+  instr_opt

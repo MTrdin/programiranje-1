@@ -41,7 +41,7 @@ type grid = row * row * row
 (*----------------------------------------------------------------------------*]
  Definirajte vrednost, ki predstavlja prazno mrežo.  
 [*----------------------------------------------------------------------------*)
-let empty_row = (None, None, None)
+let empty_row : row = (None, None, None)
 
 let empty_grid : grid = (empty_row, empty_row, empty_row)
 
@@ -120,6 +120,11 @@ let is_full_grid grid =
 let winner_of_triple triple : player option = match triple with
   | (Some X, Some X, Some X) -> Some X
   | (Some O, Some O, Some O) -> Some O
+  | _ -> None
+
+let winner_of_triple2 = function
+  | Some X, Some X, Some X -> Some X
+  | Some O, Some O, Some O -> Some O
   | _ -> None
 
 (*triples : (field * field * field)*)
