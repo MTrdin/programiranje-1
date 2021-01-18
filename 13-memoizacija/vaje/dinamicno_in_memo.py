@@ -119,7 +119,7 @@ def zabica(mocvara):
             return 0
         else:
             energija += mocvara[i]
-            return 1 + min([beg(i+d, energija-d) for d i  range(1, energija+1)])
+            return 1 + min([beg(i+d, energija-d) for d in range(1, energija+1)])
     return beg(0,0)
 
 # =============================================================================
