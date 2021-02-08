@@ -11,7 +11,7 @@ let rec list_apply_either pred f g sez = match sez with
 let int_list sez tocka =
     let rec pomozna acc_k s tocka_na_n = match s with
         | [] -> acc_k
-        | koef::ostalo -> pomozna (koef * tocka_na_n + acc_k ) ostalo (tocka + tocka_na_n)
+        | koef::ostalo -> pomozna (koef * tocka_na_n + acc_k ) ostalo (tocka * tocka_na_n)
     in 
     pomozna 0 sez 1
 

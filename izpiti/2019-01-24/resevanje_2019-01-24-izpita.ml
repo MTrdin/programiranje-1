@@ -4,7 +4,7 @@ let povsod_vecji (a0,a1,a2) (b0,b1,b2) =
     if a0 > b0 && a1 > b1 && a2 > b2 then true
     else false
 
-let uporabu_ce_lahko f a = match a with
+let uporabu_ce_lahko f x = match x with
     | None -> None
     | Some a -> Some (f a)
 
@@ -48,8 +48,8 @@ type 'a mm_drevo =
 let rec vstavi element drevo = match drevo with
     | Prano -> Vozlisce (Prazno, element, 1, Prazno)
     | Vozlisce (levo, a, st, desno) -> 
-        if element < a then vstavi element levo
-        else if element > a then vstavi element desno
+        if element < a then Vozlisce (vstavi element levo, a, st, desno)
+        else if element > a then Vozlisce(levo,a,st, vstavi element desno)
         else Vozlisce (levo, a, st + 1, desno)
 
 (*iz resitev*)
